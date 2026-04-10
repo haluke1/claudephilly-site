@@ -5,6 +5,8 @@ import LenisProvider from "@/lib/lenis-provider";
 import GsapProvider from "@/lib/gsap-provider";
 import CursorSpotlight from "@/components/shared/CursorSpotlight";
 import ClickRipple from "@/components/shared/ClickRipple";
+import Scanlines from "@/components/shared/Scanlines";
+import ElasticCursor from "@/components/shared/ElasticCursor";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-heading",
@@ -52,6 +54,8 @@ export default function RootLayout({
       <body className="bg-bg-deep text-text font-body min-h-screen">
         <CursorSpotlight />
         <ClickRipple />
+        <Scanlines />
+        <ElasticCursor />
         <LenisProvider>
           <GsapProvider>{children}</GsapProvider>
         </LenisProvider>

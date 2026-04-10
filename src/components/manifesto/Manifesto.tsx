@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import ReactiveText from "@/components/shared/ReactiveText";
+import ProximityText from "@/components/shared/ProximityText";
 
 const manifestoLines = [
   "We don't sit in lectures about AI.",
@@ -19,7 +19,6 @@ export default function Manifesto() {
     if (!sectionRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Glass card fades in after the manifesto lines
       gsap.from(descRef.current, {
         y: 60,
         opacity: 0,
@@ -54,12 +53,12 @@ export default function Manifesto() {
 
         <div className="space-y-12 md:space-y-16">
           {manifestoLines.map((line, i) => (
-            <ReactiveText
+            <ProximityText
               key={i}
               text={line}
               as="p"
-              stagger={0.07}
-              repelStrength={12}
+              blurRadius={6}
+              proximityRange={250}
               className="font-heading text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.15] text-text/90"
             />
           ))}
