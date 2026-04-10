@@ -6,7 +6,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import MagneticButton from "@/components/shared/MagneticButton";
 import TextScramble from "@/components/shared/TextScramble";
 
-// Lazy load the 3D scene — no blocking the initial paint
+// Lazy load 3D scenes — no blocking initial paint
+const CityHallScene = lazy(() => import("./CityHallScene"));
 const HeroScene = lazy(() => import("./HeroScene"));
 
 export default function Hero() {
@@ -15,14 +16,39 @@ export default function Hero() {
   const subRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const zoomRef = useRef<HTMLDivElement>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [showScene, setShowScene] = useState(false);
 
-  // Show the 3D scene after a brief delay (let text animate first)
+  const [assemblyProgress, setAssemblyProgress] = useState(0);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showScenes, setShowScenes] = useState(false);
+
+  // Scene 1 (City Hall) plays as auto-animation on load
+  // Scene 2 (Skyline) takes over when user starts scrolling
+  const scenePhase = scrollProgress < 0.05 ? "cityhall" : "skyline";
+
+  // Delay loading 3D to let text animate first
   useEffect(() => {
-    const timer = setTimeout(() => setShowScene(true), 800);
+    const timer = setTimeout(() => setShowScenes(true), 600);
     return () => clearTimeout(timer);
   }, []);
+
+  // City Hall assembly: auto-plays over ~4 seconds after scene loads
+  useEffect(() => {
+    if (!showScenes) return;
+    const start = performance.now();
+    const duration = 4000; // 4s assembly
+
+    let raf: number;
+    const animate = () => {
+      const elapsed = performance.now() - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out for satisfying lock-in
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setAssemblyProgress(eased);
+      if (progress < 1) raf = requestAnimationFrame(animate);
+    };
+    raf = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(raf);
+  }, [showScenes]);
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -47,7 +73,7 @@ export default function Hero() {
           "-=0.4"
         );
 
-      // Zoom-reveal on scroll — hero scales up and fades as you scroll down
+      // Zoom-reveal on scroll
       gsap.to(zoomRef.current, {
         scale: 1.5,
         opacity: 0,
@@ -73,14 +99,36 @@ export default function Hero() {
       ref={sectionRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* 3D Scene — behind all content */}
-      {showScene && (
+      {/* 3D Scenes — crossfade between City Hall and Skyline */}
+      {showScenes && (
         <Suspense fallback={null}>
-          <HeroScene scrollProgress={scrollProgress} />
+          {/* Scene 1: City Hall wireframe assembly */}
+          <div
+            className="absolute inset-0 transition-opacity duration-1000"
+            style={{
+              opacity: scenePhase === "cityhall" ? 1 : 0,
+              zIndex: scenePhase === "cityhall" ? 2 : 0,
+              pointerEvents: scenePhase === "cityhall" ? "auto" : "none",
+            }}
+          >
+            <CityHallScene progress={assemblyProgress} />
+          </div>
+
+          {/* Scene 2: Philadelphia skyline emergence */}
+          <div
+            className="absolute inset-0 transition-opacity duration-1000"
+            style={{
+              opacity: scenePhase === "skyline" ? 1 : 0,
+              zIndex: scenePhase === "skyline" ? 2 : 0,
+              pointerEvents: scenePhase === "skyline" ? "auto" : "none",
+            }}
+          >
+            <HeroScene scrollProgress={scrollProgress} />
+          </div>
         </Suspense>
       )}
 
-      {/* Fallback ambient glow (visible before 3D loads, fades behind it) */}
+      {/* Fallback ambient glow (visible before 3D loads) */}
       <div className="absolute inset-0 overflow-hidden" style={{ zIndex: 0 }}>
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] animate-[drift_20s_ease-in-out_infinite_alternate]" />
         <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px] animate-[drift_25s_ease-in-out_infinite_alternate-reverse]" />
@@ -93,7 +141,7 @@ export default function Hero() {
           Philadelphia&apos;s Builder-First AI Community
         </div>
 
-        {/* Headline — text scramble decode effect */}
+        {/* Headline */}
         <h1
           ref={headingRef}
           className="font-heading text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.05] tracking-tight mb-8"
