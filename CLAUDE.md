@@ -31,15 +31,46 @@ See `.planning/PROJECT.md` for the full locked spec. Do NOT change the spec with
 - Animation timing: ease curves should feel premium. Use `power2.inOut` or `power3.out` for most transitions. Never linear.
 - Mobile: simplify animations (reduce particle count, disable horizontal scroll, reduce parallax layers). Never break functionality.
 
-## Design System
+## Design System (Generated via UI UX Pro Max — Locked 2026-04-10)
 
-> Will be populated after UI UX Pro Max generation. Until then, use these defaults:
+**Style:** Liquid Glass — flowing glass, morphing, smooth transitions, translucent, animated blur, iridescent
+**Pattern:** Scroll-Triggered Storytelling — narrative chapters, progress indicator, mini-CTA per chapter + climax CTA
 
-- **Background**: Dark (#0A0A0A to #111111 range)
-- **Text**: Always #FFFFFF for body text on dark backgrounds. NEVER gray.
-- **Accent**: TBD (from design system generation)
-- **Typography**: TBD (from design system generation)
-- **Spacing**: Tailwind defaults, sections have generous vertical padding (py-24 minimum)
+### Colors
+- **Background**: #0F172A (deep slate-dark)
+- **Primary**: #1E293B (slate card surfaces)
+- **Secondary**: #334155 (slate muted)
+- **CTA / Accent**: #22C55E (builder green — "run" energy)
+- **Text**: #FFFFFF (ALWAYS pure white on dark. NEVER #F8FAFC or any gray.)
+- **Muted text**: #94A3B8 (slate-400, only for captions/timestamps, never body)
+
+### Typography
+- **Headlines**: Space Grotesk (600/700 weight) — geometric, futuristic, tech
+- **Body**: DM Sans (400/500) — clean, readable
+- **Google Fonts**: `Space+Grotesk:wght@400;500;600;700` + `DM+Sans:wght@400;500;700`
+- **Sizes**: Headlines 3xl-6xl, body base-lg, captions sm
+- **Line height**: 1.5-1.75 for body, 1.1-1.2 for headlines
+
+### Effects
+- Morphing elements (SVG/CSS)
+- Fluid animations (400-600ms curves, never fast)
+- Dynamic blur (backdrop-filter)
+- Color transitions between sections
+- Glass cards: `bg-white/5 backdrop-blur-xl border border-white/10`
+
+### Anti-Patterns (NEVER do these)
+- Cheap/fast animations (under 200ms for transitions)
+- Emojis as icons (use Lucide React)
+- Stock photos
+- Corporate badges/logos
+- Gray text on dark backgrounds (use #FFFFFF)
+
+### Spacing
+- Sections: py-32 minimum (generous breathing room for scroll storytelling)
+- Container: max-w-7xl mx-auto px-6
+- Cards: p-8 with glass effect
+
+Full design system: `design-system/claudephilly/MASTER.md`
 
 ## File Conventions
 
