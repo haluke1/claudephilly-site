@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, lazy, Suspense } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import MagneticButton from "@/components/shared/MagneticButton";
 import TextScramble from "@/components/shared/TextScramble";
+
+// Lazy load the 3D scene — no blocking the initial paint
+const HeroScene = lazy(() => import("./HeroScene"));
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -12,6 +15,14 @@ export default function Hero() {
   const subRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const zoomRef = useRef<HTMLDivElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showScene, setShowScene] = useState(false);
+
+  // Show the 3D scene after a brief delay (let text animate first)
+  useEffect(() => {
+    const timer = setTimeout(() => setShowScene(true), 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -47,6 +58,9 @@ export default function Hero() {
           end: "bottom top",
           scrub: 1.5,
           pin: true,
+          onUpdate: (self) => {
+            setScrollProgress(self.progress);
+          },
         },
       });
     }, sectionRef);
@@ -59,11 +73,17 @@ export default function Hero() {
       ref={sectionRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* Ambient glow orbs — slowly drifting, never static */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent/15 rounded-full blur-[120px] animate-[drift_20s_ease-in-out_infinite_alternate]" />
-        <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-accent/8 rounded-full blur-[100px] animate-[drift_25s_ease-in-out_infinite_alternate-reverse]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-purple-500/5 rounded-full blur-[80px] animate-[drift_30s_ease-in-out_infinite_alternate]" />
+      {/* 3D Scene — behind all content */}
+      {showScene && (
+        <Suspense fallback={null}>
+          <HeroScene scrollProgress={scrollProgress} />
+        </Suspense>
+      )}
+
+      {/* Fallback ambient glow (visible before 3D loads, fades behind it) */}
+      <div className="absolute inset-0 overflow-hidden" style={{ zIndex: 0 }}>
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] animate-[drift_20s_ease-in-out_infinite_alternate]" />
+        <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px] animate-[drift_25s_ease-in-out_infinite_alternate-reverse]" />
       </div>
 
       <div ref={zoomRef} className="relative z-10 text-center max-w-5xl mx-auto px-6">
