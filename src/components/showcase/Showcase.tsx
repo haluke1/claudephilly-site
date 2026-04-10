@@ -58,6 +58,7 @@ export default function Showcase() {
 
   return (
     <section
+      id="showcase"
       ref={sectionRef}
       className="relative min-h-screen overflow-hidden"
     >

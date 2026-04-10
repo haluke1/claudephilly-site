@@ -49,7 +49,7 @@ export default function Events() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative py-32">
+    <section id="events" ref={sectionRef} className="relative py-32">
       <div className="max-w-7xl mx-auto px-6">
         <span className="text-accent font-heading font-semibold text-sm uppercase tracking-widest">
           Chapter 03

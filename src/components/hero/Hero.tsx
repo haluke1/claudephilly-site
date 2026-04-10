@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import MagneticButton from "@/components/shared/MagneticButton";
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -91,18 +92,12 @@ export default function Hero() {
 
         {/* CTA */}
         <div ref={ctaRef} className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a
-            href="#waitlist"
-            className="group relative px-8 py-4 bg-accent text-bg-deep font-heading font-semibold text-lg rounded-full cursor-pointer transition-all duration-300 hover:bg-accent-hover hover:scale-105 hover:shadow-[0_0_40px_rgba(34,197,94,0.3)]"
-          >
+          <MagneticButton as="a" href="#waitlist" strength={0.4} className="group relative px-8 py-4 bg-accent text-bg-deep font-heading font-semibold text-lg rounded-full cursor-pointer transition-all duration-300 hover:bg-accent-hover hover:shadow-[0_0_40px_rgba(34,197,94,0.3)]">
             Apply to Join
-          </a>
-          <a
-            href="#manifesto"
-            className="px-8 py-4 glass rounded-full font-heading font-medium text-lg cursor-pointer transition-all duration-300 hover:bg-white/10"
-          >
+          </MagneticButton>
+          <MagneticButton as="a" href="#manifesto" strength={0.3} className="px-8 py-4 glass rounded-full font-heading font-medium text-lg cursor-pointer transition-all duration-300 hover:bg-white/10">
             Our Manifesto
-          </a>
+          </MagneticButton>
         </div>
 
         {/* Scroll indicator */}
