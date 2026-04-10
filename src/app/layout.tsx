@@ -3,6 +3,7 @@ import { Space_Grotesk, DM_Sans } from "next/font/google";
 import "./globals.css";
 import LenisProvider from "@/lib/lenis-provider";
 import GsapProvider from "@/lib/gsap-provider";
+import CursorSpotlight from "@/components/shared/CursorSpotlight";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-heading",
@@ -48,6 +49,7 @@ export default function RootLayout({
       className={`${spaceGrotesk.variable} ${dmSans.variable} antialiased`}
     >
       <body className="bg-bg-deep text-text font-body min-h-screen">
+        <CursorSpotlight />
         <LenisProvider>
           <GsapProvider>{children}</GsapProvider>
         </LenisProvider>

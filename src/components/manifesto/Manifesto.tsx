@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import WordReveal from "@/components/shared/WordReveal";
 
 const manifestoLines = [
   "We don't sit in lectures about AI.",
@@ -13,27 +13,23 @@ const manifestoLines = [
 
 export default function Manifesto() {
   const sectionRef = useRef<HTMLElement>(null);
-  const linesRef = useRef<(HTMLParagraphElement | null)[]>([]);
+  const descRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!sectionRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Each line reveals on scroll with stagger
-      linesRef.current.forEach((line, i) => {
-        if (!line) return;
-        gsap.from(line, {
-          y: 80,
-          opacity: 0,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: line,
-            start: "top 80%",
-            end: "top 50%",
-            scrub: 1,
-          },
-        });
+      // Glass card fades in after the manifesto lines
+      gsap.from(descRef.current, {
+        y: 60,
+        opacity: 0,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: descRef.current,
+          start: "top 85%",
+          toggleActions: "play none none reverse",
+        },
       });
     }, sectionRef);
 
@@ -58,17 +54,17 @@ export default function Manifesto() {
 
         <div className="space-y-12 md:space-y-16">
           {manifestoLines.map((line, i) => (
-            <p
+            <WordReveal
               key={i}
-              ref={(el) => { linesRef.current[i] = el; }}
+              text={line}
+              as="p"
+              stagger={0.07}
               className="font-heading text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.15] text-text/90"
-            >
-              {line}
-            </p>
+            />
           ))}
         </div>
 
-        <div className="mt-20 glass rounded-2xl p-8 md:p-12 max-w-2xl">
+        <div ref={descRef} className="mt-20 glass rounded-2xl p-8 md:p-12 max-w-2xl">
           <p className="text-lg text-text-muted leading-relaxed">
             ClaudePhilly is where Philadelphia&apos;s builders come to make things
             with AI. Not another meetup with slides. A workshop where you leave

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import MagneticButton from "@/components/shared/MagneticButton";
+import TextScramble from "@/components/shared/TextScramble";
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -58,10 +59,11 @@ export default function Hero() {
       ref={sectionRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* Background gradient orbs */}
+      {/* Ambient glow orbs — slowly drifting, never static */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-[128px] animate-pulse" />
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-accent/5 rounded-full blur-[100px]" />
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent/15 rounded-full blur-[120px] animate-[drift_20s_ease-in-out_infinite_alternate]" />
+        <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-accent/8 rounded-full blur-[100px] animate-[drift_25s_ease-in-out_infinite_alternate-reverse]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-purple-500/5 rounded-full blur-[80px] animate-[drift_30s_ease-in-out_infinite_alternate]" />
       </div>
 
       <div ref={zoomRef} className="relative z-10 text-center max-w-5xl mx-auto px-6">
@@ -71,14 +73,16 @@ export default function Hero() {
           Philadelphia&apos;s Builder-First AI Community
         </div>
 
-        {/* Headline */}
+        {/* Headline — text scramble decode effect */}
         <h1
           ref={headingRef}
           className="font-heading text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.05] tracking-tight mb-8"
         >
-          Stop Watching
+          <TextScramble text="Stop Watching" delay={400} duration={1200} />
           <br />
-          <span className="text-accent">Start Building</span>
+          <span className="text-accent">
+            <TextScramble text="Start Building" delay={900} duration={1400} />
+          </span>
         </h1>
 
         {/* Subheadline */}

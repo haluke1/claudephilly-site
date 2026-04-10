@@ -52,10 +52,46 @@ html.lenis, html.lenis body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Noise grain texture — makes dark backgrounds feel physical, not flat-screen dead */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  z-index: 9999;
+}
+
+/* Cursor spotlight — radial glow follows mouse */
+body::after {
+  content: '';
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  left: var(--mouse-x, -1000px);
+  top: var(--mouse-y, -1000px);
+  z-index: 0;
+  transition: left 0.15s ease-out, top 0.15s ease-out;
+}
+
 /* Selection color */
 ::selection {
   background-color: #22C55E;
   color: #0F172A;
+}
+
+/* Ambient orb drift animation */
+@keyframes drift {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 15px) scale(0.95); }
+  100% { transform: translate(15px, -30px) scale(1.02); }
 }
 
 /* Reduced motion */
