@@ -5,52 +5,75 @@
 
 ## Current Phase
 
-**Phase 0: Project Setup** — COMPLETE
+**Phase 1: Foundation** — COMPLETE (built + deployed)
 
 ## What's Done
 
 - [x] Spec locked (see PROJECT.md)
 - [x] Next.js 16 scaffolded with TypeScript, Tailwind, App Router
-- [x] .planning/ infrastructure created (PROJECT.md, ROADMAP.md, STATE.md)
-- [x] Project CLAUDE.md with stack rules, animation conventions, agent coordination
-- [x] UI UX Pro Max skill installed (.claude/skills/)
-- [x] Git initialized, pushed to GitHub (public): https://github.com/haluke1/claudephilly-site
-- [x] Vercel linked + first deploy live: https://claudephilly-site.vercel.app
-- [x] Memory pointer written for cross-session continuity
+- [x] .planning/ infrastructure created
+- [x] Project CLAUDE.md with full design system, animation rules, agent coordination
+- [x] UI UX Pro Max skill installed + design system generated (Liquid Glass + Scroll Storytelling)
+- [x] Git + GitHub (public): https://github.com/haluke1/claudephilly-site
+- [x] Vercel linked + production deploy: https://claudephilly-site.vercel.app
+- [x] Memory pointer for cross-session continuity
+- [x] Animation deps installed (gsap, framer-motion, lenis, three, r3f)
+- [x] Design tokens in globals.css (@theme inline)
+- [x] Lenis smooth scroll provider
+- [x] GSAP ScrollTrigger provider
+- [x] **Hero section** — stagger entry animation + zoom-reveal on scroll (pinned)
+- [x] **Manifesto section** (Chapter 01) — line-by-line scroll reveal
+- [x] **Showcase section** (Chapter 02) — horizontal scroll card gallery
+- [x] **Events section** (Chapter 03) — staggered card entry
+- [x] **Waitlist section** (Climax CTA) — email capture form with success state
+- [x] **Footer** — glass border, nav links
+- [x] **Scroll progress indicator** — GSAP-driven accent bar at top
+- [x] **Floating glass navbar** — appears after hero, chapter navigation
+- [x] **Magnetic cursor buttons** — Framer Motion on hero CTAs
+- [x] **Section color transitions** — background morphs between chapters
 
-## What's NOT Done Yet
+## What's NOT Done Yet (Phase 2+)
 
-- [ ] Connect GitHub repo to Vercel for auto-deploy (needs GitHub Login Connection in Vercel dashboard)
-- [ ] Generate design system via UI UX Pro Max (colors, typography, patterns)
-- [ ] Install animation dependencies (gsap, @gsap/react, framer-motion, lenis, @react-three/fiber, @react-three/drei)
-- [ ] Research reference sites (Shopify Editions, Awwwards winners) for animation patterns
-- [ ] Plan Phase 1 (foundation) in detail
+- [ ] Three.js WebGL hero scene (particles, 3D) — currently using gradient orbs as placeholder
+- [ ] Text character-split animations on headlines (GSAP SplitText or manual char split)
+- [ ] Scroll-scrubbed video in events section
+- [ ] Mobile responsiveness fine-tuning (horizontal scroll → vertical on mobile)
+- [ ] Podcast section / embed
+- [ ] Resources page
+- [ ] Social links / accounts
+- [ ] Actual waitlist API integration (Resend / Vercel forms)
 - [ ] Connect claudephilly.com domain
+- [ ] Favicon and OG image
+- [ ] Performance optimization (lazy load R3F, reduce motion on mobile)
+- [ ] Connect GitHub repo to Vercel for auto-deploy (needs GitHub Login Connection)
 
 ## What's Next
 
-1. **Generate design system** — Run UI UX Pro Max with the locked spec to get colors, fonts, page pattern
-2. **Install animation deps** — gsap, framer-motion, lenis, @react-three/fiber
-3. **Plan Phase 1** — Foundation: design tokens in Tailwind, base layout, Lenis smooth scroll, GSAP setup
-4. **Execute Phase 1** — Build the foundation so parallel agents can work on sections
+1. **Three.js hero** — Replace gradient orbs with interactive particle system (R3F)
+2. **Text animations** — Character-split reveal on key headlines
+3. **Mobile polish** — Disable horizontal scroll on mobile, simplify animations
+4. **Waitlist integration** — Connect to actual email capture service
+5. **Content** — Real copy, real project descriptions, event dates
+6. **Domain** — Connect claudephilly.com
 
 ## Key Decisions Log
 
 | Date | Decision | Why |
 |---|---|---|
-| 2026-04-10 | Code-first, not Framer | Multi-agent parallelism, git versioning, award-winning animations need custom code |
-| 2026-04-10 | Public repo | O-1A evidence — technical artifact of community leadership |
-| 2026-04-10 | Primary CTA = waitlist/apply | Builder-first community, everything funnels to joining |
-| 2026-04-10 | GSAP + ScrollTrigger for scroll | Industry standard for Awwwards-tier scroll-driven storytelling |
-| 2026-04-10 | Next.js 16 + Vercel | Preview deploys per branch enable visual multi-agent review |
+| 2026-04-10 | Code-first, not Framer | Multi-agent parallelism, git versioning, award-winning animations |
+| 2026-04-10 | Public repo | O-1A evidence |
+| 2026-04-10 | Primary CTA = waitlist/apply | Builder-first, everything funnels to joining |
+| 2026-04-10 | Liquid Glass + Scroll Storytelling | UI UX Pro Max recommendation, matches builder/premium feel |
+| 2026-04-10 | Space Grotesk + DM Sans | Tech/futuristic headings + clean body |
+| 2026-04-10 | #22C55E accent (green) | "Run" energy, code terminal feel |
 
 ## Blockers
 
-- **Vercel GitHub connection**: Need to add GitHub Login Connection in Vercel dashboard for auto-deploys. Manual `vercel deploy` works as fallback.
+- **Vercel GitHub auto-deploy**: Need to add GitHub Login Connection in Vercel dashboard. Manual `vercel deploy --prod` works as fallback.
 
 ## Preview URLs
 
-- **Production**: https://claudephilly-site.vercel.app (currently shows default Next.js page)
+- **Production**: https://claudephilly-site.vercel.app
 - **GitHub**: https://github.com/haluke1/claudephilly-site
 
 ## How to Continue This Project
@@ -59,5 +82,4 @@
 2. Read PROJECT.md for the locked spec
 3. Read ROADMAP.md for phase status
 4. `git log --oneline -20` for recent work
-5. Check the current phase's PLAN.md in `.planning/phases/`
-6. Continue from "What's Next" above
+5. Continue from "What's Next" above
