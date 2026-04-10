@@ -7,8 +7,8 @@
   --color-bg-deep: #0F172A;
   --color-bg-card: #1E293B;
   --color-bg-muted: #334155;
-  --color-accent: #22C55E;
-  --color-accent-hover: #16A34A;
+  --color-accent: #D97757;
+  --color-accent-hover: #C4653F;
   --color-text: #FFFFFF;
   --color-text-muted: #94A3B8;
   --color-glass-border: rgba(255, 255, 255, 0.1);
@@ -71,7 +71,7 @@ body::after {
   width: 600px;
   height: 600px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(34, 197, 94, 0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(217, 119, 87, 0.06) 0%, transparent 70%);
   pointer-events: none;
   transform: translate(-50%, -50%);
   left: var(--mouse-x, -1000px);
@@ -82,7 +82,7 @@ body::after {
 
 /* Selection color */
 ::selection {
-  background-color: #22C55E;
+  background-color: #D97757;
   color: #0F172A;
 }
 

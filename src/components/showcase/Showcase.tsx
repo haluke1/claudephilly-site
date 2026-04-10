@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import TiltCard from "@/components/shared/TiltCard";
 
 const projects = [
   {
@@ -74,9 +75,9 @@ export default function Showcase() {
 
         <div ref={trackRef} className="flex gap-8 px-6 will-change-transform">
           {projects.map((project, i) => (
-            <div
+            <TiltCard
               key={i}
-              className="glass rounded-2xl p-8 min-w-[350px] md:min-w-[450px] flex flex-col justify-between cursor-pointer transition-all duration-300 hover:bg-white/10 hover:scale-[1.02]"
+              className="relative glass rounded-2xl p-8 min-w-[350px] md:min-w-[450px] flex flex-col justify-between cursor-pointer"
             >
               <div>
                 <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-accent/20 text-accent mb-6">
@@ -105,7 +106,7 @@ export default function Showcase() {
                   />
                 </svg>
               </div>
-            </div>
+            </TiltCard>
           ))}
         </div>
       </div>

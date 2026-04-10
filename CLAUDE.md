@@ -40,7 +40,9 @@ See `.planning/PROJECT.md` for the full locked spec. Do NOT change the spec with
 - **Background**: #0F172A (deep slate-dark)
 - **Primary**: #1E293B (slate card surfaces)
 - **Secondary**: #334155 (slate muted)
-- **CTA / Accent**: #22C55E (builder green — "run" energy)
+- **CTA / Accent**: #D97757 (Claude terra cotta — brand alignment)
+- **Accent hover**: #C4653F (darker shade)
+- **Accent bright**: #E8956F (lighter for glows/bloom)
 - **Text**: #FFFFFF (ALWAYS pure white on dark. NEVER #F8FAFC or any gray.)
 - **Muted text**: #94A3B8 (slate-400, only for captions/timestamps, never body)
 

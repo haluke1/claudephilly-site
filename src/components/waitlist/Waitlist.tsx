@@ -6,6 +6,7 @@ import gsap from "gsap";
 export default function Waitlist() {
   const sectionRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
@@ -24,6 +25,18 @@ export default function Waitlist() {
           toggleActions: "play none none reverse",
         },
       });
+
+      // Pulsing ring animation
+      if (ringRef.current) {
+        gsap.to(ringRef.current, {
+          scale: 1.15,
+          opacity: 0,
+          duration: 2,
+          ease: "power1.out",
+          repeat: -1,
+          repeatDelay: 0.5,
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();
@@ -32,7 +45,6 @@ export default function Waitlist() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    // TODO: Connect to actual waitlist API (Resend, Vercel form, etc.)
     setSubmitted(true);
   };
 
@@ -45,6 +57,15 @@ export default function Waitlist() {
       {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/10 rounded-full blur-[200px]" />
+      </div>
+
+      {/* Pulsing energy rings */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+        <div
+          ref={ringRef}
+          className="w-[400px] h-[400px] md:w-[600px] md:h-[600px] rounded-full border border-accent/20"
+        />
+        <div className="absolute inset-0 w-[400px] h-[400px] md:w-[600px] md:h-[600px] rounded-full border border-accent/10 animate-[ping_3s_ease-out_infinite]" />
       </div>
 
       <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
@@ -82,7 +103,7 @@ export default function Waitlist() {
             />
             <button
               type="submit"
-              className="w-full sm:w-auto px-8 py-4 bg-accent text-bg-deep font-heading font-semibold text-lg rounded-full cursor-pointer transition-all duration-300 hover:bg-accent-hover hover:scale-105 hover:shadow-[0_0_40px_rgba(34,197,94,0.3)]"
+              className="w-full sm:w-auto px-8 py-4 bg-accent text-bg-deep font-heading font-semibold text-lg rounded-full cursor-pointer transition-all duration-300 hover:bg-accent-hover hover:scale-105 hover:shadow-[0_0_40px_rgba(217,119,87,0.3)]"
             >
               Apply Now
             </button>

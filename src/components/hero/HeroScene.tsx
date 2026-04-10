@@ -1,18 +1,16 @@
 "use client";
 
-import { useRef, useMemo, useCallback } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   InstancedMesh,
   Object3D,
   Color,
-  Vector3,
   MathUtils,
 } from "three";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 
-// --- Simplex-style noise (compact, no deps) ---
-// Attempt to use a seeded pseudo-random permutation for 3D noise
+// --- Perlin-style 3D noise (compact, zero deps) ---
 const PERM = new Uint8Array(512);
 const GRAD3 = [
   [1, 1, 0], [-1, 1, 0], [1, -1, 0], [-1, -1, 0],
@@ -21,10 +19,9 @@ const GRAD3 = [
 ];
 (() => {
   const p = Array.from({ length: 256 }, (_, i) => i);
-  // Deterministic shuffle (seed = 42)
   let seed = 42;
   for (let i = 255; i > 0; i--) {
-    seed = (seed * 16807 + 0) % 2147483647;
+    seed = (seed * 16807) % 2147483647;
     const j = seed % (i + 1);
     [p[i], p[j]] = [p[j], p[i]];
   }
@@ -34,42 +31,26 @@ const GRAD3 = [
 function dot3(g: number[], x: number, y: number, z: number) {
   return g[0] * x + g[1] * y + g[2] * z;
 }
-
 function fade(t: number) {
   return t * t * t * (t * (t * 6 - 15) + 10);
 }
-
 function noise3D(x: number, y: number, z: number): number {
-  const X = Math.floor(x) & 255;
-  const Y = Math.floor(y) & 255;
-  const Z = Math.floor(z) & 255;
-  x -= Math.floor(x);
-  y -= Math.floor(y);
-  z -= Math.floor(z);
+  const X = Math.floor(x) & 255, Y = Math.floor(y) & 255, Z = Math.floor(z) & 255;
+  x -= Math.floor(x); y -= Math.floor(y); z -= Math.floor(z);
   const u = fade(x), v = fade(y), w = fade(z);
   const A = PERM[X] + Y, AA = PERM[A] + Z, AB = PERM[A + 1] + Z;
   const B = PERM[X + 1] + Y, BA = PERM[B] + Z, BB = PERM[B + 1] + Z;
   return MathUtils.lerp(
     MathUtils.lerp(
       MathUtils.lerp(dot3(GRAD3[PERM[AA] % 12], x, y, z), dot3(GRAD3[PERM[BA] % 12], x - 1, y, z), u),
-      MathUtils.lerp(dot3(GRAD3[PERM[AB] % 12], x, y - 1, z), dot3(GRAD3[PERM[BB] % 12], x - 1, y - 1, z), u),
-      v
-    ),
+      MathUtils.lerp(dot3(GRAD3[PERM[AB] % 12], x, y - 1, z), dot3(GRAD3[PERM[BB] % 12], x - 1, y - 1, z), u), v),
     MathUtils.lerp(
       MathUtils.lerp(dot3(GRAD3[PERM[AA + 1] % 12], x, y, z - 1), dot3(GRAD3[PERM[BA + 1] % 12], x - 1, y, z - 1), u),
-      MathUtils.lerp(dot3(GRAD3[PERM[AB + 1] % 12], x, y - 1, z - 1), dot3(GRAD3[PERM[BB + 1] % 12], x - 1, y - 1, z - 1), u),
-      v
-    ),
-    w
-  );
+      MathUtils.lerp(dot3(GRAD3[PERM[AB + 1] % 12], x, y - 1, z - 1), dot3(GRAD3[PERM[BB + 1] % 12], x - 1, y - 1, z - 1), u), v), w);
 }
 
-// Fractal Brownian Motion for richer patterns
 function fbm(x: number, y: number, z: number, octaves = 4): number {
-  let value = 0;
-  let amplitude = 1;
-  let frequency = 1;
-  let maxValue = 0;
+  let value = 0, amplitude = 1, frequency = 1, maxValue = 0;
   for (let i = 0; i < octaves; i++) {
     value += noise3D(x * frequency, y * frequency, z * frequency) * amplitude;
     maxValue += amplitude;
@@ -80,165 +61,120 @@ function fbm(x: number, y: number, z: number, octaves = 4): number {
 }
 
 // --- Constants ---
-const GRID_SIZE = 32; // 32x32 = 1024 instances (good perf)
-const TOTAL = GRID_SIZE * GRID_SIZE;
-const SPACING = 0.35;
-const BASE_HEIGHT = 0.05;
-const MAX_HEIGHT = 2.5;
+const GRID = 32;
+const TOTAL = GRID * GRID;
+const GAP = 0.35;
+const MIN_H = 0.05;
+const MAX_H = 2.5;
 
-const colorDark = new Color("#1E293B");
-const colorMid = new Color("#334155");
-const colorGlow = new Color("#22C55E");
-const colorBright = new Color("#4ADE80");
+// Pre-allocated colors for lerping (avoids GC pressure)
+const _c = new Color();
+const C_DARK = new Color("#1E293B");
+const C_MID = new Color("#334155");
+const C_GLOW = new Color("#D97757");
+const C_BRIGHT = new Color("#E8956F");
 
 // --- The instanced grid ---
 function EmergenceGrid({ scrollProgress }: { scrollProgress: number }) {
   const meshRef = useRef<InstancedMesh>(null!);
   const dummy = useMemo(() => new Object3D(), []);
-  const mouseRef = useRef({ x: 0, y: 0 });
-  const { viewport } = useThree();
-
-  // Track mouse in normalized coords
-  const onPointerMove = useCallback((e: { clientX: number; clientY: number }) => {
-    mouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-    mouseRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
-  }, []);
-
-  // Attach mouse listener
-  useMemo(() => {
-    if (typeof window !== "undefined") {
-      window.addEventListener("pointermove", onPointerMove);
-    }
-    return () => {
-      if (typeof window !== "undefined") {
-        window.removeEventListener("pointermove", onPointerMove);
-      }
-    };
-  }, [onPointerMove]);
-
-  // Color array
+  const mouse = useRef({ x: 0, y: 0 });
   const colorArray = useMemo(() => new Float32Array(TOTAL * 3), []);
+
+  // Mouse tracking via useEffect (proper cleanup)
+  useEffect(() => {
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+    const handler = (e: PointerEvent) => {
+      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    };
+    window.addEventListener("pointermove", handler);
+    return () => window.removeEventListener("pointermove", handler);
+  }, []);
 
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
 
     const time = clock.getElapsedTime() * 0.3;
-    const mx = mouseRef.current.x * 0.5;
-    const my = mouseRef.current.y * 0.5;
+    const mx = mouse.current.x * 0.5;
+    const my = mouse.current.y * 0.5;
+    const emergence = Math.min(scrollProgress * 3, 1);
+    const rotY = scrollProgress * Math.PI * 0.3;
+    const halfGrid = GRID / 2;
+    const maxDist = halfGrid * GAP;
 
-    // Scroll drives emergence: 0 = flat, 1 = full height
-    const emergence = Math.min(scrollProgress * 3, 1); // reaches full height at 33% scroll
-    const rotY = scrollProgress * Math.PI * 0.3; // slow rotation with scroll
+    for (let i = 0; i < GRID; i++) {
+      for (let j = 0; j < GRID; j++) {
+        const idx = i * GRID + j;
+        const gx = (i - halfGrid) * GAP;
+        const gz = (j - halfGrid) * GAP;
 
-    for (let i = 0; i < GRID_SIZE; i++) {
-      for (let j = 0; j < GRID_SIZE; j++) {
-        const idx = i * GRID_SIZE + j;
+        const dist = Math.sqrt(gx * gx + gz * gz) / maxDist;
+        const noiseVal = fbm(gx * 0.4 + mx * 0.3, gz * 0.4 + my * 0.3, time + scrollProgress * 2);
+        const falloff = 1 - dist * dist * 0.6;
+        const h = Math.max(MIN_H, (noiseVal * 0.5 + 0.5) * MAX_H * emergence * falloff);
 
-        // Grid position (centered)
-        const gx = (i - GRID_SIZE / 2) * SPACING;
-        const gz = (j - GRID_SIZE / 2) * SPACING;
-
-        // Distance from center for radial effects
-        const distFromCenter = Math.sqrt(gx * gx + gz * gz);
-        const maxDist = (GRID_SIZE / 2) * SPACING;
-        const normalizedDist = distFromCenter / maxDist;
-
-        // Noise-driven height with time evolution
-        const noiseVal = fbm(
-          gx * 0.4 + mx * 0.3,
-          gz * 0.4 + my * 0.3,
-          time + scrollProgress * 2
-        );
-
-        // Height: noise * emergence, with radial falloff so edges are shorter
-        const radialFalloff = 1 - normalizedDist * normalizedDist * 0.6;
-        const height = Math.max(
-          BASE_HEIGHT,
-          (noiseVal * 0.5 + 0.5) * MAX_HEIGHT * emergence * radialFalloff
-        );
-
-        // Position + scale
-        dummy.position.set(gx, height / 2, gz);
-        dummy.scale.set(SPACING * 0.85, height, SPACING * 0.85);
+        dummy.position.set(gx, h / 2, gz);
+        dummy.scale.set(GAP * 0.85, h, GAP * 0.85);
         dummy.rotation.set(0, rotY, 0);
         dummy.updateMatrix();
         meshRef.current.setMatrixAt(idx, dummy.matrix);
 
-        // Color based on height — dark at base, green at peaks
-        const heightNorm = (height - BASE_HEIGHT) / (MAX_HEIGHT - BASE_HEIGHT);
-        const color = new Color();
-        if (heightNorm < 0.3) {
-          color.lerpColors(colorDark, colorMid, heightNorm / 0.3);
-        } else if (heightNorm < 0.7) {
-          color.lerpColors(colorMid, colorGlow, (heightNorm - 0.3) / 0.4);
+        // Color: dark → mid → green → bright based on height
+        const hn = (h - MIN_H) / (MAX_H - MIN_H);
+        if (hn < 0.3) {
+          _c.lerpColors(C_DARK, C_MID, hn / 0.3);
+        } else if (hn < 0.7) {
+          _c.lerpColors(C_MID, C_GLOW, (hn - 0.3) / 0.4);
         } else {
-          color.lerpColors(colorGlow, colorBright, (heightNorm - 0.7) / 0.3);
+          _c.lerpColors(C_GLOW, C_BRIGHT, (hn - 0.7) / 0.3);
         }
-
-        colorArray[idx * 3] = color.r;
-        colorArray[idx * 3 + 1] = color.g;
-        colorArray[idx * 3 + 2] = color.b;
+        colorArray[idx * 3] = _c.r;
+        colorArray[idx * 3 + 1] = _c.g;
+        colorArray[idx * 3 + 2] = _c.b;
       }
     }
 
     meshRef.current.instanceMatrix.needsUpdate = true;
-    if (meshRef.current.instanceColor) {
-      meshRef.current.instanceColor.needsUpdate = true;
-    }
-    meshRef.current.geometry.attributes.color && (meshRef.current.geometry.attributes.color.needsUpdate = true);
+    const colorAttr = meshRef.current.geometry.attributes.color;
+    if (colorAttr) colorAttr.needsUpdate = true;
   });
 
   return (
-    <instancedMesh
-      ref={meshRef}
-      args={[undefined, undefined, TOTAL]}
-      frustumCulled={false}
-    >
+    <instancedMesh ref={meshRef} args={[undefined, undefined, TOTAL]} frustumCulled={false}>
       <boxGeometry args={[1, 1, 1]}>
-        <instancedBufferAttribute
-          attach="attributes-color"
-          args={[colorArray, 3]}
-        />
+        <instancedBufferAttribute attach="attributes-color" args={[colorArray, 3]} />
       </boxGeometry>
-      <meshStandardMaterial
-        vertexColors
-        roughness={0.6}
-        metalness={0.3}
-        toneMapped={false}
-      />
+      <meshStandardMaterial vertexColors roughness={0.6} metalness={0.3} toneMapped={false} />
     </instancedMesh>
   );
 }
 
-// --- Camera rig that responds to mouse ---
+// --- Camera rig: subtle mouse-follow ---
 function CameraRig() {
   const { camera } = useThree();
-  const mouseRef = useRef({ x: 0, y: 0 });
+  const mouse = useRef({ x: 0, y: 0 });
 
-  useMemo(() => {
-    if (typeof window !== "undefined") {
-      const handler = (e: MouseEvent) => {
-        mouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-        mouseRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
-      };
-      window.addEventListener("mousemove", handler);
-      return () => window.removeEventListener("mousemove", handler);
-    }
+  useEffect(() => {
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+    const handler = (e: MouseEvent) => {
+      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    };
+    window.addEventListener("mousemove", handler);
+    return () => window.removeEventListener("mousemove", handler);
   }, []);
 
   useFrame(() => {
-    // Subtle camera tilt based on mouse
-    const targetX = 0 + mouseRef.current.x * 1.5;
-    const targetZ = 0 + mouseRef.current.y * 1.5;
-    camera.position.x = MathUtils.lerp(camera.position.x, targetX, 0.03);
-    camera.position.z = MathUtils.lerp(camera.position.z, 8 + targetZ, 0.03);
+    camera.position.x = MathUtils.lerp(camera.position.x, mouse.current.x * 1.5, 0.03);
+    camera.position.z = MathUtils.lerp(camera.position.z, 8 + mouse.current.y * 1.5, 0.03);
     camera.lookAt(0, 0, 0);
   });
 
   return null;
 }
 
-// --- Main exported scene ---
+// --- Main scene ---
 export default function HeroScene({ scrollProgress = 0 }: { scrollProgress: number }) {
   return (
     <div className="absolute inset-0" style={{ zIndex: 1 }}>
@@ -250,20 +186,14 @@ export default function HeroScene({ scrollProgress = 0 }: { scrollProgress: numb
       >
         <ambientLight intensity={0.2} />
         <directionalLight position={[5, 10, 5]} intensity={0.4} color="#94A3B8" />
-        {/* Green point light from below — illuminates peaks */}
-        <pointLight position={[0, -2, 0]} intensity={2} color="#22C55E" distance={15} />
-        <pointLight position={[3, -1, 3]} intensity={1} color="#22C55E" distance={10} />
+        <pointLight position={[0, -2, 0]} intensity={2} color="#D97757" distance={15} />
+        <pointLight position={[3, -1, 3]} intensity={1} color="#D97757" distance={10} />
 
         <EmergenceGrid scrollProgress={scrollProgress} />
         <CameraRig />
 
         <EffectComposer>
-          <Bloom
-            intensity={0.6}
-            luminanceThreshold={0.4}
-            luminanceSmoothing={0.9}
-            mipmapBlur
-          />
+          <Bloom intensity={0.6} luminanceThreshold={0.4} luminanceSmoothing={0.9} mipmapBlur />
         </EffectComposer>
       </Canvas>
     </div>

@@ -116,7 +116,7 @@ export default function Hero() {
 
         {/* CTA */}
         <div ref={ctaRef} className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <MagneticButton as="a" href="#waitlist" strength={0.4} className="group relative px-8 py-4 bg-accent text-bg-deep font-heading font-semibold text-lg rounded-full cursor-pointer transition-all duration-300 hover:bg-accent-hover hover:shadow-[0_0_40px_rgba(34,197,94,0.3)]">
+          <MagneticButton as="a" href="#waitlist" strength={0.4} className="group relative px-8 py-4 bg-accent text-bg-deep font-heading font-semibold text-lg rounded-full cursor-pointer transition-all duration-300 hover:bg-accent-hover hover:shadow-[0_0_40px_rgba(217,119,87,0.3)]">
             Apply to Join
           </MagneticButton>
           <MagneticButton as="a" href="#manifesto" strength={0.3} className="px-8 py-4 glass rounded-full font-heading font-medium text-lg cursor-pointer transition-all duration-300 hover:bg-white/10">

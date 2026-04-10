@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import WordReveal from "@/components/shared/WordReveal";
+import ReactiveText from "@/components/shared/ReactiveText";
 
 const manifestoLines = [
   "We don't sit in lectures about AI.",
@@ -54,11 +54,12 @@ export default function Manifesto() {
 
         <div className="space-y-12 md:space-y-16">
           {manifestoLines.map((line, i) => (
-            <WordReveal
+            <ReactiveText
               key={i}
               text={line}
               as="p"
               stagger={0.07}
+              repelStrength={12}
               className="font-heading text-3xl md:text-5xl lg:text-6xl font-bold leading-[1.15] text-text/90"
             />
           ))}
