@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { withCors, corsOptions } from "@/lib/cors";
+
+export async function OPTIONS() { return corsOptions(); }
 
 export async function GET() {
   const { data, error } = await supabaseAdmin
@@ -8,7 +11,7 @@ export async function GET() {
     .order("started_at", { ascending: false })
     .limit(50);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return withCors(NextResponse.json({ error: error.message }, { status: 500 }));
 
   const totalMinutes = (data ?? [])
     .filter((s) => s.duration_minutes != null)
@@ -16,10 +19,10 @@ export async function GET() {
 
   const activeSession = (data ?? []).find((s) => s.ended_at === null) ?? null;
 
-  return NextResponse.json({
+  return withCors(NextResponse.json({
     total_hours: Math.round(totalMinutes / 60),
     total_minutes: Math.round(totalMinutes),
     active_session: activeSession,
     sessions: data ?? [],
-  });
+  }));
 }

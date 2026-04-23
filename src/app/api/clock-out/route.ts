@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { withCors, corsOptions } from "@/lib/cors";
+
+export async function OPTIONS() { return corsOptions(); }
 
 export async function POST(req: NextRequest) {
   if (req.headers.get("x-clock-secret") !== process.env.CLOCK_SECRET) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
   }
 
   const { data, error } = await supabaseAdmin
@@ -13,6 +16,6 @@ export async function POST(req: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ session: data });
+  if (error) return withCors(NextResponse.json({ error: error.message }, { status: 500 }));
+  return withCors(NextResponse.json({ session: data }));
 }
