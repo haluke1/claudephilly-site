@@ -42,3 +42,12 @@ else
 fi
 
 echo "📊 STATE.md Recent Changes updated (push to $BRANCH)"
+
+# Sync snapshot to Desktop master project folder
+MASTER="$HOME/Desktop/HALUK MASTER PROJECTS/claudephilly.com"
+if [ -d "$MASTER" ]; then
+  echo "_Last synced from git: $DATE_" > "$MASTER/LAST_PUSH.md"
+  echo "" >> "$MASTER/LAST_PUSH.md"
+  echo "$COMMITS" >> "$MASTER/LAST_PUSH.md"
+  echo "📁 Desktop master folder synced"
+fi
