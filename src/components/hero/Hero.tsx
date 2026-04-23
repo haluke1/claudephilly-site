@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import MagneticButton from "@/components/shared/MagneticButton";
 import TextScramble from "@/components/shared/TextScramble";
+import { useIsMobile } from "@/lib/use-is-mobile";
 
 // Lazy load 3D scenes — no blocking initial paint
 const CityHallScene = lazy(() => import("./CityHallScene"));
@@ -17,6 +18,7 @@ export default function Hero() {
   const ctaRef = useRef<HTMLDivElement>(null);
   const zoomRef = useRef<HTMLDivElement>(null);
 
+  const isMobile = useIsMobile();
   const [assemblyProgress, setAssemblyProgress] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showScenes, setShowScenes] = useState(false);
@@ -25,11 +27,12 @@ export default function Hero() {
   // Scene 2 (Skyline) takes over when user starts scrolling
   const scenePhase = scrollProgress < 0.05 ? "cityhall" : "skyline";
 
-  // Delay loading 3D to let text animate first
+  // Delay loading 3D to let text animate first — desktop only
   useEffect(() => {
+    if (isMobile) return;
     const timer = setTimeout(() => setShowScenes(true), 600);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isMobile]);
 
   // City Hall assembly: auto-plays over ~4 seconds after scene loads
   useEffect(() => {
