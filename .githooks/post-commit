@@ -1,0 +1,34 @@
+#!/bin/bash
+# Auto-append to CHANGELOG.md after every commit.
+# Writes to disk only — no git operations (avoids recursion).
+
+CHANGELOG="CHANGELOG.md"
+DATE=$(date "+%Y-%m-%d %H:%M")
+HASH=$(git rev-parse --short HEAD)
+SUBJECT=$(git log -1 --pretty=format:"%s")
+BODY=$(git log -1 --pretty=format:"%b")
+FILES=$(git diff-tree --no-commit-id -r --name-only HEAD 2>/dev/null | tr '\n' ',' | sed 's/,$//' | sed 's/,/, /g')
+
+# Bootstrap file if missing
+if [ ! -f "$CHANGELOG" ]; then
+  printf "# Changelog\n\nAll changes auto-logged per commit. Reasoning lives in the commit body.\n\n---\n\n" > "$CHANGELOG"
+fi
+
+# Build entry
+ENTRY="## [$HASH] $DATE\n**$SUBJECT**\n"
+if [ -n "$BODY" ]; then
+  ENTRY="${ENTRY}\n$BODY\n"
+fi
+if [ -n "$FILES" ]; then
+  ENTRY="${ENTRY}\nFiles: \`$FILES\`\n"
+fi
+ENTRY="${ENTRY}\n---\n\n"
+
+# Prepend entry after the header (first 4 lines)
+TEMP=$(mktemp)
+head -4 "$CHANGELOG" > "$TEMP"
+printf "$ENTRY" >> "$TEMP"
+tail -n +5 "$CHANGELOG" >> "$TEMP"
+mv "$TEMP" "$CHANGELOG"
+
+echo "📋 CHANGELOG.md updated [$HASH]"

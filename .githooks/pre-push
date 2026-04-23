@@ -1,0 +1,44 @@
+#!/bin/bash
+# Auto-update STATE.md "Recent Changes" section before every push.
+# Reads all commits not yet on remote and writes a summary block.
+# Writes to disk only — no git operations.
+
+STATE=".planning/STATE.md"
+REMOTE="origin"
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+DATE=$(date "+%Y-%m-%d %H:%M")
+
+# Get commits being pushed (local commits not on remote)
+REMOTE_SHA=$(git rev-parse "$REMOTE/$BRANCH" 2>/dev/null || echo "")
+if [ -n "$REMOTE_SHA" ]; then
+  COMMITS=$(git log "$REMOTE_SHA..HEAD" --pretty=format:"- [%h] %s" 2>/dev/null)
+else
+  COMMITS=$(git log --pretty=format:"- [%h] %s" | head -10)
+fi
+
+if [ -z "$COMMITS" ]; then
+  exit 0
+fi
+
+if [ ! -f "$STATE" ]; then
+  echo "STATE.md not found, skipping update."
+  exit 0
+fi
+
+# Build the Recent Changes block
+BLOCK="## Recent Changes _(auto-updated on push)_\n\n_Last push: $DATE → \`$BRANCH\`_\n\n$COMMITS\n\n---"
+
+# Replace existing Recent Changes block, or append it
+if grep -q "^## Recent Changes" "$STATE"; then
+  # Remove old block (from "## Recent Changes" to next "---" or EOF)
+  TEMP=$(mktemp)
+  awk '/^## Recent Changes/,/^---$/{next} {print}' "$STATE" > "$TEMP"
+  # Append new block
+  printf "\n$BLOCK\n" >> "$TEMP"
+  mv "$TEMP" "$STATE"
+else
+  # Append new block at end of file
+  printf "\n$BLOCK\n" >> "$STATE"
+fi
+
+echo "📊 STATE.md Recent Changes updated (push to $BRANCH)"
