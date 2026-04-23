@@ -7,6 +7,7 @@ import Footer from "@/components/footer/Footer";
 import ScrollProgress from "@/components/shared/ScrollProgress";
 import Navbar from "@/components/shared/Navbar";
 import SectionTransition from "@/components/shared/SectionTransition";
+import WorkHoursBadge from "@/components/shared/WorkHoursBadge";
 
 export default function Home() {
   return (
@@ -25,6 +26,7 @@ export default function Home() {
         <Waitlist />
       </main>
       <Footer />
+      <WorkHoursBadge />
     </>
   );
 }
